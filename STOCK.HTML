@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stok Blox Fruits - Mode Tabel + Gaji</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background: #f5f5f5;
+    }
+
+    /* ===============================
+        TABEL STOK: semua kolom seragam
+       =============================== */
+    #stock-table {
+      table-layout: fixed !important;
+      width: 100%;
+    }
+
+    #stock-table th,
+    #stock-table td {
+      min-width: 120px !important;
+      max-width: 120px !important;
+      width: 120px !important;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    /* kolom nomor (#) */
+    #stock-table th:nth-child(1),
+    #stock-table td:nth-child(1) {
+      width: 50px !important;
+      min-width: 50px !important;
+      max-width: 50px !important;
+    }
+
+    /* Nama akun */
+    #stock-table th:nth-child(2),
+    #stock-table td:nth-child(2) {
+      width: 160px !important;
+      min-width: 160px !important;
+      max-width: 160px !important;
+      text-align: left;
+      padding-left: 8px;
+    }
+
+    /* STORAGE */
+    #stock-table th:nth-child(3),
+    #stock-table td:nth-child(3) {
+      width: 90px !important;
+      min-width: 90px !important;
+      max-width: 90px !important;
+    }
+
+    /* Mirror nama akun (kolom sebelum aksi) */
+    #stock-table th:nth-last-child(2),
+    #stock-table td:nth-last-child(2) {
+      width: 160px !important;
+      min-width: 160px !important;
+      max-width: 160px !important;
+      text-align: left;
+      padding-left: 8px;
+    }
+
+    /* Kolom aksi */
+    #stock-table th:last-child,
+    #stock-table td:last-child {
+      width: 90px !important;
+      min-width: 90px !important;
+      max-width: 90px !important;
+    }
+
+    /* Tombol stok kecil */
+    .btn-stock {
+      padding: 2px 6px !important;
+      font-size: 0.75rem !important;
+      line-height: 1;
+    }
+
+    .stock-value {
+      font-size: 1.1rem;
+      font-weight: bold;
+      min-width: 32px;
+      display: inline-block;
+    }
+
+    /* Tabel Gaji */
+    #salary-table th,
+    #salary-table td {
+      white-space: nowrap;
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark mb-3">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">📊 Stok & Gaji Blox Fruits</span>
+  </div>
+</nav>
+
+<div class="container mb-5">
+
+  <!-- NAV TAB -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-akun">Kelola Akun</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stok">Lihat Stok</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gaji">Gaji</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- =================== TAB 1: KELOLA AKUN =================== -->
+    <div class="tab-pane fade show active" id="tab-akun">
+      <div class="row g-4">
+
+        <div class="col-lg-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5>Tambah / Edit Akun</h5>
+
+              <form id="account-form">
+                <input type="hidden" id="account-id">
+
+                <label class="form-label">Nama Akun</label>
+                <input type="text" id="nama-akun" class="form-control mb-2" required>
+
+                <label class="form-label">STORAGE</label>
+                <input type="number" id="storage" class="form-control mb-3" min="0">
+
+                <button class="btn btn-primary" type="submit">Simpan</button>
+                <button class="btn btn-secondary" id="reset-btn" type="button">Reset</button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h6>Petunjuk</h6>
+              <p class="text-muted small mb-1">
+                • Data stok & gaji disimpan di browser (localStorage).  
+              </p>
+              <p class="text-muted small mb-1">
+                • Semua stok awal = 0. Untuk ubah stok, buka tab “Lihat Stok”.
+              </p>
+              <p class="text-muted small mb-0">
+                • Tab “Gaji” untuk catat penjualan (Bersih, Modal, Selisih).
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================== TAB 2: LIHAT STOK =================== -->
+    <div class="tab-pane fade" id="tab-stok">
+
+      <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex justify-content-between flex-wrap gap-3">
+
+          <div>
+            <h5 class="mb-0">Tabel Stok</h5>
+            <small class="text-muted" id="summary-text">Total akun: 0</small>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" id="toggle-edit">
+              <label class="form-check-label" for="toggle-edit">Mode Edit Stok (+/-)</label>
+            </div>
+
+            <input type="text" id="search" class="form-control form-control-sm"
+                   placeholder="Cari nama akun..." style="min-width:200px;">
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body table-responsive">
+          <table class="table table-bordered table-sm" id="stock-table">
+            <thead id="table-head" class="table-dark"></thead>
+            <tbody id="table-body"></tbody>
+            <tfoot id="table-foot"></tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =================== TAB 3: GAJI =================== -->
+    <div class="tab-pane fade" id="tab-gaji">
+      <div class="row g-4">
+
+        <div class="col-xl-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5>Input Gaji / Penjualan</h5>
+
+              <form id="salary-form">
+                <input type="hidden" id="salary-id">
+
+                <div class="mb-2">
+                  <label class="form-label">Tanggal</label>
+                  <input type="date" id="salary-date" class="form-control form-control-sm">
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label">Fruit</label>
+                  <select id="salary-fruit" class="form-select form-select-sm">
+                    <option value="">-- pilih fruit --</option>
+                  </select>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label">Jumlah</label>
+                  <input type="number" id="salary-qty" class="form-control form-control-sm" min="1" value="1">
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label">Bersih (Rp)</label>
+                  <input type="number" id="salary-bersih" class="form-control form-control-sm" min="0" value="0">
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label">Modal (Rp)</label>
+                  <input type="number" id="salary-modal" class="form-control form-control-sm" min="0" value="0">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Selisih (Bersih - Modal)</label>
+                  <input type="number" id="salary-selisih" class="form-control form-control-sm" readonly>
+                </div>
+
+                <button class="btn btn-primary btn-sm" type="submit">Simpan</button>
+                <button class="btn btn-secondary btn-sm" id="salary-reset-btn" type="button">Reset</button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-8">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Rekap Gaji</h6>
+                <small class="text-muted" id="salary-summary">Total data: 0</small>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm" id="salary-table">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>#</th>
+                      <th>Tanggal</th>
+                      <th>Fruit</th>
+                      <th>Jumlah</th>
+                      <th>Bersih</th>
+                      <th>Modal</th>
+                      <th>Selisih</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="salary-body"></tbody>
+                  <tfoot id="salary-foot"></tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  /* ===============================
+        DATA & KONFIGURASI
+     =============================== */
+
+  const FRUITS = [
+    "Dragon West","Dragon East","Kitsun","Yeti","Gas","Dough","Lightning",
+    "Lighting Purple","Lighting Yellow","Lighting Green","Red Lightning",
+    "Mammoth","trex","pain",
+    "gravity","leopard","Werewolf","Super Spirit Pair","Sadness Pain",
+    "Torment Pain","Frustraion Pain","Celestial Pain","Glacier Eagle",
+    "Requiem Eagle","portal","buddha"
+  ];
+
+  const STORAGE_KEY = "stok_bloxfruit_table_v1";
+  const SALARY_KEY  = "stok_bloxfruit_gaji_v1";
+  let showControls = false;   // tombol +/- ON/OFF
+
+  function getAccounts() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  function saveAccounts(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function generateId() {
+    return "id-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+  }
+
+  /* ===============================
+        HEADER TABEL STOK
+     =============================== */
+  function renderHeader() {
+    const thead = document.getElementById("table-head");
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <th>#</th>
+      <th>Nama Akun</th>
+      <th>STORAGE</th>
+    `;
+
+    FRUITS.forEach(f => {
+      const th = document.createElement("th");
+      th.textContent = f;
+      tr.appendChild(th);
+    });
+
+    const thMirror = document.createElement("th");
+    thMirror.textContent = "Mirror Nama";
+    tr.appendChild(thMirror);
+
+    const thAction = document.createElement("th");
+    thAction.textContent = "Aksi";
+    tr.appendChild(thAction);
+
+    thead.innerHTML = "";
+    thead.appendChild(tr);
+  }
+
+  /* ===============================
+        FOOTER TOTAL STOK
+     =============================== */
+  function renderFooter(list) {
+    const tfoot = document.getElementById("table-foot");
+    tfoot.innerHTML = "";
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `<th colspan="3" class="table-warning text-end">Total</th>`;
+
+    FRUITS.forEach(fruit => {
+      let total = 0;
+      list.forEach(acc => total += acc.stocks[fruit] || 0);
+
+      const td = document.createElement("td");
+      td.className = "table-warning";
+      td.textContent = total;
+      tr.appendChild(td);
+    });
+
+    // Mirror
+    const tdMirror = document.createElement("td");
+    tdMirror.className = "table-warning";
+    tr.appendChild(tdMirror);
+
+    const tdAksi = document.createElement("td");
+    tdAksi.className = "table-warning";
+    tr.appendChild(tdAksi);
+
+    tfoot.appendChild(tr);
+  }
+
+  /* ===============================
+        RENDER TABEL STOK
+     =============================== */
+  function renderTable(filter = "") {
+    const body = document.getElementById("table-body");
+    const accounts = getAccounts();
+    const f = filter.toLowerCase();
+
+    const list = accounts.filter(a => a.nama.toLowerCase().includes(f));
+    body.innerHTML = "";
+
+    list.forEach((acc, idx) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td><input class="form-control form-control-sm" value="${acc.nama}"
+                   onchange="updateAccountField('${acc.id}', 'nama', this.value)"></td>
+        <td><input type="number" class="form-control form-control-sm"
+                   value="${acc.storage || 0}"
+                   onchange="updateAccountField('${acc.id}', 'storage', this.value)"></td>
+      `;
+
+      FRUITS.forEach(fruit => {
+        const val = acc.stocks[fruit] || 0;
+        const td = document.createElement("td");
+
+        if (showControls) {
+          td.innerHTML = `
+            <button class="btn btn-outline-danger btn-stock" onclick="adjustStock('${acc.id}','${fruit}',-1)">&lt;</button>
+            <span class="stock-value">${val}</span>
+            <button class="btn btn-outline-success btn-stock" onclick="adjustStock('${acc.id}','${fruit}',1)">&gt;</button>
+          `;
+        } else {
+          td.innerHTML = `<span class="stock-value">${val}</span>`;
+        }
+
+        tr.appendChild(td);
+      });
+
+      // Mirror kolom
+      const tdMirror = document.createElement("td");
+      tdMirror.textContent = acc.nama;
+      tr.appendChild(tdMirror);
+
+      // Aksi
+      const tdAksi = document.createElement("td");
+      tdAksi.innerHTML = `
+        <button class="btn btn-sm btn-danger" onclick="deleteAccount('${acc.id}')">Hapus</button>
+      `;
+      tr.appendChild(tdAksi);
+
+      body.appendChild(tr);
+    });
+
+    renderFooter(accounts);
+    document.getElementById("summary-text").textContent = `Total akun: ${list.length}`;
+  }
+
+  /* ===============================
+        CRUD AKUN
+     =============================== */
+  function updateAccountField(id, field, value) {
+    let data = getAccounts();
+    data = data.map(acc =>
+      acc.id === id ? { ...acc, [field]: field === "storage" ? parseInt(value||0) : value } : acc
+    );
+    saveAccounts(data);
+    renderTable(document.getElementById("search").value);
+  }
+
+  document.getElementById("account-form").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const id = document.getElementById("account-id").value;
+    const nama = document.getElementById("nama-akun").value.trim();
+    const storage = parseInt(document.getElementById("storage").value || 0);
+
+    if (!nama) return alert("Nama wajib!");
+
+    let data = getAccounts();
+
+    if (id) {
+      data = data.map(acc => acc.id === id ? { ...acc, nama, storage } : acc);
+    } else {
+      const st = {};
+      FRUITS.forEach(f => st[f] = 0);
+
+      data.push({
+        id: generateId(),
+        nama,
+        storage,
+        stocks: st
+      });
+    }
+
+    saveAccounts(data);
+    renderTable();
+    document.getElementById("account-form").reset();
+    document.getElementById("account-id").value = "";
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    document.getElementById("account-form").reset();
+    document.getElementById("account-id").value = "";
+  });
+
+  function deleteAccount(id) {
+    if (!confirm("Hapus akun ini?")) return;
+    const data = getAccounts().filter(a => a.id !== id);
+    saveAccounts(data);
+    renderTable();
+  }
+
+  /* ===============================
+        UBAH STOK
+     =============================== */
+  function adjustStock(id, fruit, delta) {
+    let data = getAccounts();
+    const idx = data.findIndex(a => a.id === id);
+    if (idx < 0) return;
+
+    const current = data[idx].stocks[fruit] || 0;
+    let next = current + delta;
+    if (next < 0) next = 0;
+
+    data[idx].stocks[fruit] = next;
+    saveAccounts(data);
+    renderTable(document.getElementById("search").value);
+  }
+
+  /* ===============================
+        GAJI: DATA & UTIL
+     =============================== */
+  function getSalary() {
+    const raw = localStorage.getItem(SALARY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  function saveSalary(data) {
+    localStorage.setItem(SALARY_KEY, JSON.stringify(data));
+  }
+
+  function recalcSelisihInput() {
+    const bersih = parseInt(document.getElementById("salary-bersih").value || 0);
+    const modal  = parseInt(document.getElementById("salary-modal").value || 0);
+    document.getElementById("salary-selisih").value = bersih - modal;
+  }
+
+  /* ===============================
+        RENDER GAJI
+     =============================== */
+  function renderSalaryTable() {
+    const body = document.getElementById("salary-body");
+    const foot = document.getElementById("salary-foot");
+    const summary = document.getElementById("salary-summary");
+
+    const data = getSalary();
+    body.innerHTML = "";
+    foot.innerHTML = "";
+
+    let totalBersih = 0, totalModal = 0, totalSelisih = 0;
+
+    data.forEach((row, idx) => {
+      totalBersih += row.bersih;
+      totalModal  += row.modal;
+      totalSelisih += row.selisih;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>${row.tanggal || ""}</td>
+        <td>${row.fruit}</td>
+        <td>${row.jumlah}</td>
+        <td>${row.bersih}</td>
+        <td>${row.modal}</td>
+        <td>${row.selisih}</td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="deleteSalary('${row.id}')">Hapus</button>
+        </td>
+      `;
+      body.appendChild(tr);
+    });
+
+    const trTotal = document.createElement("tr");
+    trTotal.className = "table-warning fw-bold";
+    trTotal.innerHTML = `
+      <td colspan="4" class="text-end">Total</td>
+      <td>${totalBersih}</td>
+      <td>${totalModal}</td>
+      <td>${totalSelisih}</td>
+      <td></td>
+    `;
+    foot.appendChild(trTotal);
+
+    summary.textContent = `Total data: ${data.length} | Selisih: ${totalSelisih}`;
+  }
+
+  function deleteSalary(id) {
+    if (!confirm("Hapus data gaji ini?")) return;
+    const data = getSalary().filter(r => r.id !== id);
+    saveSalary(data);
+    renderSalaryTable();
+  }
+
+  /* ===============================
+        FORM GAJI
+     =============================== */
+  document.getElementById("salary-bersih").addEventListener("input", recalcSelisihInput);
+  document.getElementById("salary-modal").addEventListener("input", recalcSelisihInput);
+
+  document.getElementById("salary-reset-btn").addEventListener("click", () => {
+    document.getElementById("salary-form").reset();
+    document.getElementById("salary-id").value = "";
+    recalcSelisihInput();
+  });
+
+  document.getElementById("salary-form").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const id      = document.getElementById("salary-id").value;
+    const tanggal = document.getElementById("salary-date").value;
+    const fruit   = document.getElementById("salary-fruit").value || "";
+    const jumlah  = parseInt(document.getElementById("salary-qty").value || 0);
+    const bersih  = parseInt(document.getElementById("salary-bersih").value || 0);
+    const modal   = parseInt(document.getElementById("salary-modal").value || 0);
+    const selisih = bersih - modal;
+
+    if (!fruit) return alert("Fruit belum dipilih");
+    if (!jumlah) return alert("Jumlah minimal 1");
+
+    let data = getSalary();
+
+    if (id) {
+      data = data.map(r => r.id === id ? { ...r, tanggal, fruit, jumlah, bersih, modal, selisih } : r);
+    } else {
+      data.push({
+        id: generateId(),
+        tanggal,
+        fruit,
+        jumlah,
+        bersih,
+        modal,
+        selisih
+      });
+    }
+
+    saveSalary(data);
+    renderSalaryTable();
+    document.getElementById("salary-form").reset();
+    document.getElementById("salary-id").value = "";
+    recalcSelisihInput();
+  });
+
+  /* ===============================
+        SEARCH & TOGGLE EDIT
+     =============================== */
+  document.getElementById("search").addEventListener("input", e => {
+    renderTable(e.target.value);
+  });
+
+  document.getElementById("toggle-edit").addEventListener("change", e => {
+    showControls = e.target.checked;
+    renderTable(document.getElementById("search").value);
+  });
+
+  /* ===============================
+        INIT
+     =============================== */
+  window.addEventListener("DOMContentLoaded", () => {
+    // stok
+    renderHeader();
+    renderTable();
+
+    // isi dropdown fruit di form gaji
+    const selectFruit = document.getElementById("salary-fruit");
+    FRUITS.forEach(f => {
+      const opt = document.createElement("option");
+      opt.value = f;
+      opt.textContent = f;
+      selectFruit.appendChild(opt);
+    });
+
+    // gaji
+    recalcSelisihInput();
+    renderSalaryTable();
+  });
+
+</script>
+
+</body>
+</html>
